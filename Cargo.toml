@@ -1,0 +1,10 @@
+[package]
+name = "bobo-is-you"
+version = "0.1.0"
+authors = ["Hugo Laloge <hugo.laloge@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+amethyst = "0.9"
+log = "*"
+serde = "1"

@@ -46,41 +46,49 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
             .with(self.assets.entity_sprite(ENTITY_SPRITE_WALL))
             .build();
 
-        world.create_entity()
+        world
+            .create_entity()
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(2, 2))
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_BOBO))
+            .with(Instruction::Name(Named::Bobo))
             .build();
 
-        world.create_entity()
+        world
+            .create_entity()
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(3, 2))
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_IS))
+            .with(Instruction::Is)
             .build();
 
-
-        world.create_entity()
+        world
+            .create_entity()
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(4, 2))
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_YOU))
+            .with(Instruction::Cap(Capabilities::is_you()))
             .build();
 
-        world.create_entity()
+        world
+            .create_entity()
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(3, 1))
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_WALL))
+            .with(Instruction::Name(Named::Wall))
             .build();
 
-
-        world.create_entity()
+        world
+            .create_entity()
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(3, 3))
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_STOP))
+            .with(Instruction::Cap(Capabilities::is_stop()))
             .build();
     }
 
@@ -115,8 +123,8 @@ fn initialise_camera(world: &mut World) -> Entity {
             CAMERA_HEIGHT,
             0.0,
         )))
-        .with(GlobalTransform(
-            Matrix4::from_translation(Vector3::new(0.0, 0.0, 1.0)),
-        ))
+        .with(GlobalTransform(Matrix4::from_translation(Vector3::new(
+            0.0, 0.0, 1.0,
+        ))))
         .build()
 }

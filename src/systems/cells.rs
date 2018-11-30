@@ -1,7 +1,7 @@
 use amethyst::core::Transform;
 use amethyst::ecs::{Join, ReadStorage, System, WriteStorage};
 
-use crate::components::{CellCoordinate, PIXEL_PER_CASE, LEVEL_HEIGHT};
+use crate::components::{CellCoordinate, LEVEL_HEIGHT, PIXEL_PER_CASE};
 
 /// Sync Cell coordinates with Transform;
 pub struct CellCoordinateSystem;

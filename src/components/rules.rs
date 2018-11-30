@@ -1,9 +1,11 @@
 #![allow(dead_code)]
 
+use std::ops::BitOr;
+
 use amethyst::ecs::{storage::VecStorage, Component};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Hash, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum Named {
     Bobo,
     Flag,
@@ -11,6 +13,17 @@ pub enum Named {
 }
 
 impl Component for Named {
+    type Storage = VecStorage<Self>;
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+pub enum Instruction {
+    Name(Named),
+    Is,
+    Cap(Capabilities),
+}
+
+impl Component for Instruction {
     type Storage = VecStorage<Self>;
 }
 
@@ -22,6 +35,10 @@ pub struct Capabilities {
 }
 
 impl Capabilities {
+    pub fn empty() -> Capabilities {
+        Capabilities::default()
+    }
+
     pub fn is_you() -> Capabilities {
         Capabilities {
             is_you: true,
@@ -44,6 +61,19 @@ impl Capabilities {
     }
 }
 
+impl BitOr for Capabilities {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self {
+        Capabilities {
+            is_you: self.is_you | rhs.is_you,
+            is_stop: self.is_stop | rhs.is_stop,
+            is_win: self.is_win | rhs.is_win,
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct Rules {
     pub bobo: Capabilities,
     pub flag: Capabilities,
@@ -51,6 +81,12 @@ pub struct Rules {
 }
 
 impl Rules {
+    pub fn reset(&mut self) {
+        self.bobo = Capabilities::empty();
+        self.flag = Capabilities::empty();
+        self.wall = Capabilities::empty();
+    }
+
     pub fn caps_for(&self, named: Named) -> &Capabilities {
         use self::Named::*;
         match named {

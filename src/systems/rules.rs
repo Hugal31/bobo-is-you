@@ -41,7 +41,7 @@ impl RulesUpdateSystem {
                 (cell, Instruction::Cap(c)) if *cell == cap_cell => Some(c),
                 _ => None,
             }) {
-                *rules.caps_mut_for(name) = *rules.caps_for(name) | *cap;
+                *rules.caps_mut_for(name) = rules.caps_for(name) | *cap;
             }
         }
     }

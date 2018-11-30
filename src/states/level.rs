@@ -27,6 +27,15 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
 
         initialise_camera(world);
 
+        world
+            .create_entity()
+            .with(GlobalTransform::new())
+            .with(Transform::default())
+            .with(CellCoordinate::new(4, 4))
+            .with(Named::Wall)
+            .with(self.assets.entity_sprite(ENTITY_SPRITE_WALL))
+            .build();
+
         // Create player
         world
             .create_entity()
@@ -41,16 +50,8 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
             .create_entity()
             .with(GlobalTransform::new())
             .with(Transform::default())
-            .with(CellCoordinate::new(4, 4))
-            .with(Named::Wall)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_WALL))
-            .build();
-
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::default())
             .with(CellCoordinate::new(2, 2))
+            .with(Named::Instruction)
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_BOBO))
             .with(Instruction::Name(Named::Bobo))
             .build();
@@ -60,6 +61,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(3, 2))
+            .with(Named::Instruction)
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_IS))
             .with(Instruction::Is)
             .build();
@@ -69,6 +71,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(4, 2))
+            .with(Named::Instruction)
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_YOU))
             .with(Instruction::Cap(Capabilities::is_you()))
             .build();
@@ -78,6 +81,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(3, 1))
+            .with(Named::Instruction)
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_WALL))
             .with(Instruction::Name(Named::Wall))
             .build();
@@ -87,8 +91,19 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(3, 3))
+            .with(Named::Instruction)
             .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_STOP))
             .with(Instruction::Cap(Capabilities::is_stop()))
+            .build();
+
+        world
+            .create_entity()
+            .with(GlobalTransform::new())
+            .with(Transform::default())
+            .with(CellCoordinate::new(6, 3))
+            .with(Named::Instruction)
+            .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_STOP))
+            .with(Instruction::Cap(Capabilities::is_push()))
             .build();
     }
 
@@ -124,7 +139,7 @@ fn initialise_camera(world: &mut World) -> Entity {
             0.0,
         )))
         .with(GlobalTransform(Matrix4::from_translation(Vector3::new(
-            0.0, 0.0, 1.0,
+            0.0, 0.0, 2.0,
         ))))
         .build()
 }

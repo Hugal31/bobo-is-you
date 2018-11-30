@@ -3,7 +3,7 @@ use amethyst::core::{GlobalTransform, Transform};
 use amethyst::ecs::Entity;
 use amethyst::input::is_close_requested;
 use amethyst::prelude::*;
-use amethyst::renderer::{Camera, Projection, SpriteVisibility};
+use amethyst::renderer::{Camera, Projection, Transparent};
 
 use crate::assets::*;
 use crate::components::*;
@@ -27,6 +27,17 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
 
         initialise_camera(world);
 
+        // Create player
+        world
+            .create_entity()
+            .with(GlobalTransform::new())
+            .with(Transform::from(Vector3::new(0.0, 0.0, 1.0)))
+            .with(CellCoordinate::default())
+            .with(Named::Bobo)
+            .with(self.assets.entity_sprite(ENTITY_SPRITE_BOBO))
+            .with(Transparent)
+            .build();
+
         world
             .create_entity()
             .with(GlobalTransform::new())
@@ -34,16 +45,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
             .with(CellCoordinate::new(4, 4))
             .with(Named::Wall)
             .with(self.assets.entity_sprite(ENTITY_SPRITE_WALL))
-            .build();
-
-        // Create player
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::default())
-            .with(CellCoordinate::default())
-            .with(Named::Bobo)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_BOBO))
+            .with(Transparent)
             .build();
 
         world

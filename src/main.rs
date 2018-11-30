@@ -43,9 +43,7 @@ fn main() -> Result<(), amethyst::Error> {
         InputBundle::<(), inputs::InputAction>::new().with_bindings_from_file(INPUT_CONFIG_PATH)?;
 
     let game_data = GameDataBuilder::default()
-        .with_bundle(RenderBundle::new(pipe, Some(display_config))
-                     .with_sprite_sheet_processor()
-                     .with_sprite_visibility_sorting())?
+        .with_bundle(RenderBundle::new(pipe, Some(display_config)).with_sprite_sheet_processor())?
         .with_bundle(input_bundle)?
         .with_bundle(TransformBundle::new())?
         .with_bundle(bundle::BoboIsYouBundle)?;

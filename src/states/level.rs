@@ -27,16 +27,14 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
 
         initialise_camera(world);
 
-        let mut visibility = world.res.fetch_mut::<SpriteVisibility>();
-
-        visibility.visible_unordered.add(world
+        world
             .create_entity()
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(4, 4))
             .with(Named::Wall)
             .with(self.assets.entity_sprite(ENTITY_SPRITE_WALL))
-            .build().id);
+            .build();
 
         // Create player
         world

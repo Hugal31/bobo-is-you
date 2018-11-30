@@ -104,7 +104,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
             .with(Transform::default())
             .with(CellCoordinate::new(6, 3))
             .with(Named::Instruction)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_STOP))
+            .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_PUSH))
             .with(Instruction::Cap(Capabilities::is_push()))
             .build();
     }

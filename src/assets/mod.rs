@@ -7,6 +7,7 @@ pub const ENTITY_SPRITE_INST_BOBO: usize = 3;
 pub const ENTITY_SPRITE_INST_WALL: usize = 4;
 pub const ENTITY_SPRITE_INST_YOU: usize = 5;
 pub const ENTITY_SPRITE_INST_STOP: usize = 6;
+pub const ENTITY_SPRITE_INST_PUSH: usize = 7;
 
 #[derive(Clone)]
 pub struct GameAssets {

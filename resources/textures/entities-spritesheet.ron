@@ -44,5 +44,11 @@
 			width: 32,
 			height: 32
 		),
+		(
+			x: 96,
+			y: 32,
+			width: 32,
+			height: 32
+		),
 	]
 )

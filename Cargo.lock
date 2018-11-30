@@ -415,6 +415,7 @@ name = "bobo-is-you"
 version = "0.1.0"
 dependencies = [
  "amethyst 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fern 0.5.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.80 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

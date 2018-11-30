@@ -1,12 +1,13 @@
 use amethyst::assets::{AssetStorage, Loader, ProgressCounter};
-use amethyst::prelude::*;
-use amethyst::renderer::{MaterialTextureSet, PngFormat,
-                         SpriteSheet,SpriteSheetHandle, SpriteSheetFormat,
-                         Texture, TextureHandle, TextureMetadata};
 use amethyst::ecs::Resources;
+use amethyst::prelude::*;
+use amethyst::renderer::{
+    MaterialTextureSet, PngFormat, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle, Texture,
+    TextureHandle, TextureMetadata,
+};
 
-use crate::assets::GameAssets;
 use super::MenuState;
+use crate::assets::GameAssets;
 
 #[derive(Default)]
 pub struct LoaderState {
@@ -22,7 +23,11 @@ impl LoaderState {
         LoaderState::default()
     }
 
-    fn load_textured_spritesheet(&mut self, name: &str, resources: &Resources) -> SpriteSheetHandle {
+    fn load_textured_spritesheet(
+        &mut self,
+        name: &str,
+        resources: &Resources,
+    ) -> SpriteSheetHandle {
         let texture = self.load_texture(&format!("{}.png", name), resources);
 
         let texture_id = self.texture_ids;
@@ -45,7 +50,12 @@ impl LoaderState {
         )
     }
 
-    fn load_sprite_sheet(&mut self, path: &str, texture_id: u64, resources: &Resources) -> SpriteSheetHandle {
+    fn load_sprite_sheet(
+        &mut self,
+        path: &str,
+        texture_id: u64,
+        resources: &Resources,
+    ) -> SpriteSheetHandle {
         /*let texture_id = self.texture_ids;
         let mut material_texture_set = resources.fetch_mut::<MaterialTextureSet>();
         material_texture_set.insert(texture_id, texture);*/
@@ -58,17 +68,16 @@ impl LoaderState {
             &mut self.progress,
             &spritesheet_storage,
         )
-
     }
 }
 
 impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LoaderState {
-
     fn on_start(&mut self, data: StateData<GameData>) {
         let StateData { world, .. } = data;
 
         self.assets = Some(GameAssets {
-            entities_spritesheet: self.load_textured_spritesheet("textures/entities-spritesheet", &world.res)
+            entities_spritesheet: self
+                .load_textured_spritesheet("textures/entities-spritesheet", &world.res),
         });
     }
 
@@ -77,7 +86,9 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LoaderState {
 
         if self.progress.is_complete() {
             debug!("Loading complete!");
-            Trans::Push(Box::new(MenuState::new(self.assets.clone().expect("on_start was not called"))))
+            Trans::Push(Box::new(MenuState::new(
+                self.assets.clone().expect("on_start was not called"),
+            )))
         } else {
             Trans::None
         }

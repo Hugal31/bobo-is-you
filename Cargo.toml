@@ -7,4 +7,5 @@ edition = "2018"
 [dependencies]
 amethyst = "0.9"
 log = "*"
+fern = "*"
 serde = "1"

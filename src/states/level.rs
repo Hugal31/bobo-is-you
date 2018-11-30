@@ -3,7 +3,7 @@ use amethyst::core::{GlobalTransform, Transform};
 use amethyst::ecs::Entity;
 use amethyst::input::is_close_requested;
 use amethyst::prelude::*;
-use amethyst::renderer::{Camera, Projection};
+use amethyst::renderer::{Camera, Projection, SpriteVisibility};
 
 use crate::assets::*;
 use crate::components::*;
@@ -27,14 +27,16 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
 
         initialise_camera(world);
 
-        world
+        let mut visibility = world.res.fetch_mut::<SpriteVisibility>();
+
+        visibility.visible_unordered.add(world
             .create_entity()
             .with(GlobalTransform::new())
             .with(Transform::default())
             .with(CellCoordinate::new(4, 4))
             .with(Named::Wall)
             .with(self.assets.entity_sprite(ENTITY_SPRITE_WALL))
-            .build();
+            .build().id);
 
         // Create player
         world

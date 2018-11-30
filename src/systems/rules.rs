@@ -1,8 +1,14 @@
-use amethyst::ecs::{Join, ReadStorage, System, Write};
+use amethyst::ecs::prelude::{Join, InsertedFlag, ModifiedFlag, ReaderId,
+                             ReadStorage, RemovedFlag, Resources, System, Write, WriteStorage};
 
 use crate::components::*;
 
-pub struct RulesUpdateSystem;
+#[derive(Default)]
+pub struct RulesUpdateSystem {
+    inserted_id: Option<ReaderId<InsertedFlag>>,
+    modified_id: Option<ReaderId<ModifiedFlag>>,
+    removed_id: Option<ReaderId<RemovedFlag>>,
+}
 
 impl RulesUpdateSystem {
     fn try_resolve(
@@ -19,6 +25,7 @@ impl RulesUpdateSystem {
             }
         }
 
+        // Try right
         if let Some(right) = cell.try_right(LEVEL_WIDTH) {
             if let Some(rightright) = right.try_right(LEVEL_WIDTH) {
                 Self::try_resolve_for_cells(rules, name, right, rightright, (insts, cells))
@@ -54,13 +61,34 @@ impl<'s> System<'s> for RulesUpdateSystem {
         ReadStorage<'s, CellCoordinate>,
     );
 
+    fn setup(&mut self, res: &mut Resources) {
+        use amethyst::ecs::SystemData;
+        Self::SystemData::setup(res);
+
+        let mut cells = WriteStorage::<CellCoordinate>::fetch(res);
+        self.inserted_id = Some(cells.inserted_mut().register_reader());
+        self.modified_id = Some(cells.modified_mut().register_reader());
+        self.removed_id = Some(cells.removed_mut().register_reader());
+    }
+
     fn run(&mut self, (mut rules, insts, cells): Self::SystemData) {
+        // FIXME: Is there a better way than this?
+        let modified_count = cells.modified().read(self.modified_id.as_mut().expect("setup was not called")).count();
+        let inserted_count = cells.inserted().read(self.inserted_id.as_mut().expect("setup was not called")).count();
+        let removed_count = cells.removed().read(self.removed_id.as_mut().expect("setup was not called")).count();
+
+        if modified_count == 0 && inserted_count == 0 && removed_count == 0 {
+            return;
+        }
+
         rules.reset();
 
-        for (inst, cell) in (&insts, &cells).join() {
-            if let Instruction::Name(name) = inst {
-                Self::try_resolve(&mut rules, *name, *cell, &insts, &cells);
-            }
-        }
+        (&insts, &cells)
+            .join()
+            .filter_map(|(i, c)| match i {
+                Instruction::Name(n) => Some((n, c)),
+                _ => None
+            })
+            .for_each(|(&name, &cell)| Self::try_resolve(&mut rules, name, cell, &insts, &cells));
     }
 }

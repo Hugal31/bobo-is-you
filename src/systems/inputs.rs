@@ -81,7 +81,7 @@ impl<'s> System<'s> for MoveActionSystem {
     fn run(&mut self, (entities, rules, actions, names, mut cells): Self::SystemData) {
         for action in actions.read(self.action_reader.as_mut().expect("setup was not called")) {
             if let InputEvent::ActionPressed(a) = action {
-                let to_move = (&entities, &names, &mut cells)
+                let to_move = (&entities, &names, &cells)
                     .join()
                     .filter(|(_, name, _)| rules.caps_for(**name).is_you)
                     .flat_map(|(e, _, cell)| {

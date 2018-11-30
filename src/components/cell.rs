@@ -1,4 +1,4 @@
-use amethyst::ecs::{storage::VecStorage, Component};
+use amethyst::ecs::prelude::{Component, FlaggedStorage, VecStorage};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct CellCoordinate {
@@ -58,7 +58,7 @@ impl CellCoordinate {
 }
 
 impl Component for CellCoordinate {
-    type Storage = VecStorage<Self>;
+    type Storage = FlaggedStorage<Self, VecStorage<Self>>;
 }
 
 #[cfg(test)]

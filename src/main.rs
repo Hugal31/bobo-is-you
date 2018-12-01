@@ -1,30 +1,10 @@
 extern crate amethyst;
-extern crate serde;
-#[macro_use]
-extern crate log;
+extern crate bobo_is_you;
+extern crate clap;
 
-mod assets;
-mod bundle;
-mod components;
-mod inputs;
 mod logger;
-mod prefabs;
-mod states;
-mod systems;
 
 use std::env;
-
-use amethyst::core::transform::TransformBundle;
-use amethyst::input::InputBundle;
-use amethyst::prelude::*;
-use amethyst::renderer::{
-    ColorMask, DisplayConfig, DrawSprite, Pipeline, RenderBundle, Stage, ALPHA,
-};
-
-const DISPLAY_CONFIG_PATH: &str =
-    concat!(env!("CARGO_MANIFEST_DIR"), "/resources/display_config.ron");
-const INPUT_CONFIG_PATH: &str =
-    concat!(env!("CARGO_MANIFEST_DIR"), "/resources/bindings_config.ron");
 
 fn main() -> Result<(), amethyst::Error> {
     if env::var("RUST_LOG") == Err(env::VarError::NotPresent) {
@@ -33,28 +13,16 @@ fn main() -> Result<(), amethyst::Error> {
 
     logger::start_logger(Default::default());
 
-    let display_config = DisplayConfig::load(&DISPLAY_CONFIG_PATH);
-    let pipe = Pipeline::build().with_stage(
-        Stage::with_backbuffer()
-            .clear_target([0.0, 0.0, 0.0, 1.0], 1.0)
-            .with_pass(DrawSprite::new().with_transparency(ColorMask::all(), ALPHA, None)),
-    );
+    let matches = clap::App::new("Bobo Is You")
+        .version("0.1")
+        .author("Hugo Laloge")
+        .subcommand(clap::SubCommand::with_name("editor").about("Launch the level editor"))
+        .get_matches();
 
-    let input_bundle =
-        InputBundle::<(), inputs::InputAction>::new().with_bindings_from_file(INPUT_CONFIG_PATH)?;
-
-    let game_data = GameDataBuilder::default()
-        .with_bundle(TransformBundle::new())?
-        .with_bundle(input_bundle)?
-        .with_bundle(bundle::BoboIsYouBundle)?
-        .with_bundle(
-            RenderBundle::new(pipe, Some(display_config))
-                .with_sprite_sheet_processor()
-                .with_sprite_visibility_sorting(&["transform_system"]),
-        )?;
-
-    let mut game =
-        Application::build("./resources", states::StartState::new())?.build(game_data)?;
-    game.run();
-    Ok(())
+    if matches.subcommand_matches("edit").is_some() {
+        println!("No game editor for now");
+        Ok(())
+    } else {
+        bobo_is_you::start_game()
+    }
 }

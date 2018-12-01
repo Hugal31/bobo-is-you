@@ -5,7 +5,7 @@ authors = ["Hugo Laloge <hugo.laloge@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-amethyst = "0.9"
+amethyst = { version = "0.9", features = ["nightly"] }
 log = "*"
 fern = "*"
 serde = "1"

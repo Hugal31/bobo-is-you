@@ -27,7 +27,11 @@ impl MoveActionSystem {
         direction: InputAction,
         new_cell: CellCoordinate,
         rules: &Rules,
-        (entities, nameds, cells): (&Entities, &ReadStorage<Named>, &mut WriteStorage<CellCoordinate>),
+        (entities, nameds, cells): (
+            &Entities,
+            &ReadStorage<Named>,
+            &mut WriteStorage<CellCoordinate>,
+        ),
     ) -> bool {
         // Note: The &* is to duplicate the ref, join() move the values.
         // If someone has a better idea, I would like to know.
@@ -38,19 +42,25 @@ impl MoveActionSystem {
             return false;
         }
 
-        if let Some((pushed_entity, pushed_cell)) = (&*entities, &*nameds, &*cells)
+        if let Some((pushed_entity, pushed_cell)) = (entities, &*nameds, &*cells)
             .join()
             .find(|(_, &name, &pos)| rules.caps_for(name).is_push && pos == new_cell)
             .map(|(e, _, pos)| (e, pos))
-            .clone() {
-                if let Some(next_pos) = Self::next_cell(*pushed_cell, direction) {
-                    if !Self::try_move_entity(pushed_entity, direction, next_pos, rules, (entities, nameds, cells)) {
-                        return false;
-                    }
-                } else {
+        {
+            if let Some(next_pos) = Self::next_cell(*pushed_cell, direction) {
+                if !Self::try_move_entity(
+                    pushed_entity,
+                    direction,
+                    next_pos,
+                    rules,
+                    (entities, nameds, cells),
+                ) {
                     return false;
                 }
+            } else {
+                return false;
             }
+        }
 
         cells.get_mut(entity).unwrap().x = new_cell.x;
         cells.get_mut(entity).unwrap().y = new_cell.y;

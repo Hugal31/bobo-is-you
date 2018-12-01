@@ -8,6 +8,7 @@ mod bundle;
 mod components;
 mod inputs;
 mod logger;
+mod prefabs;
 mod states;
 mod systems;
 
@@ -46,10 +47,11 @@ fn main() -> Result<(), amethyst::Error> {
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
         .with_bundle(bundle::BoboIsYouBundle)?
-        .with_bundle(RenderBundle::new(pipe, Some(display_config))
-                     .with_sprite_sheet_processor()
-                     .with_sprite_visibility_sorting(&["transform_system"]))?
-        ;
+        .with_bundle(
+            RenderBundle::new(pipe, Some(display_config))
+                .with_sprite_sheet_processor()
+                .with_sprite_visibility_sorting(&["transform_system"]),
+        )?;
 
     let mut game =
         Application::build("./resources", states::StartState::new())?.build(game_data)?;

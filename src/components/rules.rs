@@ -29,6 +29,7 @@ impl Component for Instruction {
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize)]
+#[serde(default)]
 pub struct Capabilities {
     pub is_you: bool,
     pub is_push: bool,

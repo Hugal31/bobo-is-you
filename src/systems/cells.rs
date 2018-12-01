@@ -1,6 +1,8 @@
 use amethyst::core::Transform;
-use amethyst::ecs::prelude::{BitSet, Join, InsertedFlag, ModifiedFlag, ReaderId,
-                             ReadStorage, Resources, System, WriteStorage};
+use amethyst::ecs::prelude::{
+    BitSet, InsertedFlag, Join, ModifiedFlag, ReadStorage, ReaderId, Resources, System,
+    WriteStorage,
+};
 
 use crate::components::{CellCoordinate, LEVEL_HEIGHT, PIXEL_PER_CASE};
 
@@ -28,10 +30,14 @@ impl<'s> System<'s> for CellCoordinateSystem {
     fn run(&mut self, (cells, mut transforms): Self::SystemData) {
         self.modified.clear();
 
-        cells.populate_modified(self.modified_id.as_mut().expect("setup was not called"),
-                                &mut self.modified);
-        cells.populate_inserted(self.inserted_id.as_mut().expect("setup was not called"),
-                                &mut self.modified);
+        cells.populate_modified(
+            self.modified_id.as_mut().expect("setup was not called"),
+            &mut self.modified,
+        );
+        cells.populate_inserted(
+            self.inserted_id.as_mut().expect("setup was not called"),
+            &mut self.modified,
+        );
 
         for (cell, transform, _) in (&cells, &mut transforms, &self.modified).join() {
             transform.translation.x = (cell.x as f32 + 0.5) * PIXEL_PER_CASE;

@@ -1,23 +1,23 @@
 use amethyst::core::cgmath::{Matrix4, Vector3};
-use amethyst::core::{GlobalTransform, Transform};
+use amethyst::core::{GlobalTransform, Parent};
 use amethyst::ecs::Entity;
-use amethyst::input::is_close_requested;
+use amethyst::input::{is_close_requested, is_key_down};
 use amethyst::prelude::*;
-use amethyst::renderer::{Camera, Projection, Transparent};
+use amethyst::renderer::{Camera, Projection};
+use amethyst::winit::VirtualKeyCode;
 
-use crate::assets::*;
 use crate::components::*;
 
 pub const CAMERA_WIDTH: f32 = PIXEL_PER_CASE * LEVEL_WIDTH as f32;
 pub const CAMERA_HEIGHT: f32 = PIXEL_PER_CASE * LEVEL_HEIGHT as f32;
 
 pub struct LevelState {
-    assets: GameAssets,
+    level_entity: Entity,
 }
 
 impl LevelState {
-    pub fn new(assets: GameAssets) -> LevelState {
-        LevelState { assets }
+    pub fn new(level_entity: Entity) -> LevelState {
+        LevelState { level_entity }
     }
 }
 
@@ -25,88 +25,13 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
     fn on_start(&mut self, data: StateData<GameData>) {
         let StateData { world, .. } = data;
 
-        initialise_camera(world);
+        initialise_camera(self.level_entity, world);
+    }
 
-        // Create player
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::from(Vector3::new(0.0, 0.0, 1.0)))
-            .with(CellCoordinate::default())
-            .with(Named::Bobo)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_BOBO))
-            .with(Transparent)
-            .build();
-
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::default())
-            .with(CellCoordinate::new(4, 4))
-            .with(Named::Wall)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_WALL))
-            .with(Transparent)
-            .build();
-
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::default())
-            .with(CellCoordinate::new(2, 2))
-            .with(Named::Instruction)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_BOBO))
-            .with(Instruction::Name(Named::Bobo))
-            .build();
-
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::default())
-            .with(CellCoordinate::new(3, 2))
-            .with(Named::Instruction)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_IS))
-            .with(Instruction::Is)
-            .build();
-
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::default())
-            .with(CellCoordinate::new(4, 2))
-            .with(Named::Instruction)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_YOU))
-            .with(Instruction::Cap(Capabilities::is_you()))
-            .build();
-
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::default())
-            .with(CellCoordinate::new(3, 1))
-            .with(Named::Instruction)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_WALL))
-            .with(Instruction::Name(Named::Wall))
-            .build();
-
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::default())
-            .with(CellCoordinate::new(3, 3))
-            .with(Named::Instruction)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_STOP))
-            .with(Instruction::Cap(Capabilities::is_stop()))
-            .build();
-
-        world
-            .create_entity()
-            .with(GlobalTransform::new())
-            .with(Transform::default())
-            .with(CellCoordinate::new(6, 3))
-            .with(Named::Instruction)
-            .with(self.assets.entity_sprite(ENTITY_SPRITE_INST_PUSH))
-            .with(Instruction::Cap(Capabilities::is_push()))
-            .build();
+    fn on_stop(&mut self, data: StateData<GameData>) {
+        data.world
+            .delete_entity(self.level_entity)
+            .expect("Level entity was deleted");
     }
 
     fn handle_event(
@@ -114,14 +39,14 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
         _data: StateData<GameData>,
         event: StateEvent,
     ) -> Trans<GameData<'a, 'b>, StateEvent> {
-        if let StateEvent::Window(event) = &event {
-            if is_close_requested(&event) {
+        match &event {
+            StateEvent::Window(e)
+                if is_close_requested(e) || is_key_down(&e, VirtualKeyCode::Escape) =>
+            {
                 Trans::Quit
-            } else {
-                Trans::None
             }
-        } else {
-            Trans::None
+            StateEvent::Window(e) if is_key_down(e, VirtualKeyCode::R) => Trans::Pop,
+            _ => Trans::None,
         }
     }
 
@@ -131,7 +56,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
     }
 }
 
-fn initialise_camera(world: &mut World) -> Entity {
+fn initialise_camera(parent: Entity, world: &mut World) -> Entity {
     world
         .create_entity()
         .with(Camera::from(Projection::orthographic(
@@ -143,5 +68,6 @@ fn initialise_camera(world: &mut World) -> Entity {
         .with(GlobalTransform(Matrix4::from_translation(Vector3::new(
             0.0, 0.0, 2.0,
         ))))
+        .with(Parent { entity: parent })
         .build()
 }

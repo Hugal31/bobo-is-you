@@ -1,0 +1,70 @@
+#![enable(implicit_some)]
+Prefab (
+  entities: [
+    (
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 0, y: 0),
+	typ: Bobo,
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 4, y: 5),
+        typ: Wall,
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 4, y: 6),
+        typ: Wall,
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 2, y: 3),
+	typ: Instruction(Name(Bobo)),
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 3, y: 3),
+	typ: Instruction(Is),
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 4, y: 3),
+	typ: Instruction(Cap((is_you: true))),
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 3, y: 2),
+	typ: Instruction(Name(Wall)),
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 3, y: 4),
+	typ: Instruction(Cap((is_stop: true))),
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 7, y: 6),
+	typ: Instruction(Cap((is_push: true))),
+      ),
+    ),
+  ]
+)

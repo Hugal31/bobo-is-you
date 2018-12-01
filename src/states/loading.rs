@@ -15,7 +15,6 @@ pub struct LoaderState {
     progress: ProgressCounter,
     /// Texture id counter
     texture_ids: u64,
-    assets: Option<GameAssets>,
 }
 
 impl LoaderState {
@@ -75,7 +74,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LoaderState {
     fn on_start(&mut self, data: StateData<GameData>) {
         let StateData { world, .. } = data;
 
-        self.assets = Some(GameAssets {
+        world.add_resource(GameAssets {
             entities_spritesheet: self
                 .load_textured_spritesheet("textures/entities-spritesheet", &world.res),
         });
@@ -86,9 +85,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LoaderState {
 
         if self.progress.is_complete() {
             debug!("Loading complete!");
-            Trans::Push(Box::new(MenuState::new(
-                self.assets.clone().expect("on_start was not called"),
-            )))
+            Trans::Push(Box::new(MenuState::new()))
         } else {
             Trans::None
         }

@@ -1,6 +1,7 @@
 use amethyst::ecs::prelude::{Component, FlaggedStorage, VecStorage};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub struct CellCoordinate {
     pub x: u32,
     pub y: u32,

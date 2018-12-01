@@ -1,20 +1,17 @@
 use amethyst::prelude::*;
 
-use super::LevelState;
-use crate::assets::GameAssets;
+use super::LevelLoaderState;
 
-pub struct MenuState {
-    assets: GameAssets,
-}
+pub struct MenuState {}
 
 impl MenuState {
-    pub fn new(assets: GameAssets) -> MenuState {
-        MenuState { assets }
+    pub fn new() -> MenuState {
+        MenuState {}
     }
 }
 
 impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for MenuState {
     fn update(&mut self, _data: StateData<GameData>) -> Trans<GameData<'a, 'b>, StateEvent> {
-        Trans::Push(Box::new(LevelState::new(self.assets.clone())))
+        Trans::Push(Box::new(LevelLoaderState::new("levels/level1.ron")))
     }
 }

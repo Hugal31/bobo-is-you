@@ -75,20 +75,20 @@ impl<'s> System<'s> for RulesUpdateSystem {
 
     fn run(&mut self, (mut rules, insts, cells): Self::SystemData) {
         // FIXME: Is there a better way than this?
-        let modified_count = cells
+        let modified = cells
             .modified()
             .read(self.modified_id.as_mut().expect("setup was not called"))
-            .count();
-        let inserted_count = cells
+            .len() != 0;
+        let inserted = cells
             .inserted()
             .read(self.inserted_id.as_mut().expect("setup was not called"))
-            .count();
-        let removed_count = cells
+            .len() != 0;
+        let removed = cells
             .removed()
             .read(self.removed_id.as_mut().expect("setup was not called"))
-            .count();
+            .len() != 0;
 
-        if modified_count == 0 && inserted_count == 0 && removed_count == 0 {
+        if !modified && !inserted && !removed {
             return;
         }
 

@@ -1,4 +1,4 @@
-use amethyst::assets::{PrefabLoader, ProgressCounter, RonFormat};
+use amethyst::assets::{Completion, PrefabLoader, ProgressCounter, RonFormat};
 use amethyst::ecs::Entity;
 use amethyst::prelude::*;
 
@@ -14,7 +14,7 @@ pub struct LevelLoaderState {
 }
 
 impl LevelLoaderState {
-    pub fn new(level_name: impl Into<String>) -> LevelLoaderState {
+    pub fn for_level(level_name: impl Into<String>) -> LevelLoaderState {
         LevelLoaderState {
             level_name: level_name.into(),
             progress: ProgressCounter::new(),
@@ -37,13 +37,15 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelLoaderState {
     fn update(&mut self, data: StateData<GameData>) -> Trans<GameData<'a, 'b>, StateEvent> {
         data.data.update(data.world);
 
-        if self.progress.is_complete() {
-            debug!("Level loading complete!");
-            Trans::Switch(Box::new(LevelState::new(
-                self.level_entity.expect("on_start was not called"),
-            )))
-        } else {
-            Trans::None
+        match self.progress.complete() {
+            Completion::Complete => {
+                info!("Level {} loaded!", self.level_name);
+                Trans::Switch(Box::new(LevelState::new(
+                    self.level_entity.expect("on_start was not called"),
+                )))
+            },
+            Completion::Failed => Trans::Quit,
+            Completion::Loading => Trans::None,
         }
     }
 }

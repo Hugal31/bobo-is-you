@@ -87,5 +87,12 @@ Prefab (
 	typ: Instruction(Is),
       ),
     ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 6, y: 8),
+	typ: Instruction(Name(Flag)),
+      ),
+    ),
   ]
 )

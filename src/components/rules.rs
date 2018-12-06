@@ -2,7 +2,10 @@
 
 use std::ops::BitOr;
 
-use amethyst::ecs::{storage::VecStorage, Component};
+use amethyst::ecs::{
+    storage::{FlaggedStorage, VecStorage},
+    Component,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -14,7 +17,7 @@ pub enum Named {
 }
 
 impl Component for Named {
-    type Storage = VecStorage<Self>;
+    type Storage = FlaggedStorage<Self, VecStorage<Self>>;
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]

@@ -17,20 +17,23 @@ impl RulesUpdateSystem {
         rules: &mut Rules,
         name: Named,
         cell: CellCoordinate,
-        insts: &ReadStorage<Instruction>,
-        cells: &ReadStorage<CellCoordinate>,
+        (insts, cells, names): (
+            &ReadStorage<Instruction>,
+            &ReadStorage<CellCoordinate>,
+            &mut WriteStorage<Named>,
+        ),
     ) {
         // Try down
         if let Some(down) = cell.try_down(LEVEL_HEIGHT) {
             if let Some(downdown) = down.try_down(LEVEL_HEIGHT) {
-                Self::try_resolve_for_cells(rules, name, down, downdown, (insts, cells))
+                Self::try_resolve_for_cells(rules, name, down, downdown, (insts, cells, names))
             }
         }
 
         // Try right
         if let Some(right) = cell.try_right(LEVEL_WIDTH) {
             if let Some(rightright) = right.try_right(LEVEL_WIDTH) {
-                Self::try_resolve_for_cells(rules, name, right, rightright, (insts, cells))
+                Self::try_resolve_for_cells(rules, name, right, rightright, (insts, cells, names))
             }
         }
     }
@@ -40,17 +43,33 @@ impl RulesUpdateSystem {
         name: Named,
         is_cell: CellCoordinate,
         cap_cell: CellCoordinate,
-        (insts, cells): (&ReadStorage<Instruction>, &ReadStorage<CellCoordinate>),
+        (insts, cells, names): (
+            &ReadStorage<Instruction>,
+            &ReadStorage<CellCoordinate>,
+            &mut WriteStorage<Named>,
+        ),
     ) {
+        // Search for the Is
         if (cells, insts).join().any(|ci| match ci {
             (cell, Instruction::Is) if *cell == is_cell => true,
             _ => false,
         }) {
+            // Search for a Cap
             if let Some(cap) = (cells, insts).join().find_map(|ci| match ci {
                 (cell, Instruction::Cap(c)) if *cell == cap_cell => Some(c),
                 _ => None,
             }) {
                 *rules.caps_mut_for(name) = rules.caps_for(name) | *cap;
+
+            // Search for a name
+            } else if let Some(other_name) = (cells, insts).join().find_map(|ci| match ci {
+                (cell, Instruction::Name(n)) if *cell == cap_cell => Some(n),
+                _ => None,
+            }) {
+                for name_to_transform in (names).join().filter(|&&mut n| n == name) {
+                    debug!("Transform a {:?} into {:?}", name_to_transform, other_name);
+                    *name_to_transform = *other_name;
+                }
             }
         }
     }
@@ -61,6 +80,7 @@ impl<'s> System<'s> for RulesUpdateSystem {
         Write<'s, Rules>,
         ReadStorage<'s, Instruction>,
         ReadStorage<'s, CellCoordinate>,
+        WriteStorage<'s, Named>,
     );
 
     fn setup(&mut self, res: &mut Resources) {
@@ -73,7 +93,7 @@ impl<'s> System<'s> for RulesUpdateSystem {
         self.removed_id = Some(cells.removed_mut().register_reader());
     }
 
-    fn run(&mut self, (mut rules, insts, cells): Self::SystemData) {
+    fn run(&mut self, (mut rules, insts, cells, mut names): Self::SystemData) {
         // FIXME: Is there a better way than this?
         let modified = cells
             .modified()
@@ -103,6 +123,8 @@ impl<'s> System<'s> for RulesUpdateSystem {
                 Instruction::Name(n) => Some((n, c)),
                 _ => None,
             })
-            .for_each(|(&name, &cell)| Self::try_resolve(&mut rules, name, cell, &insts, &cells));
+            .for_each(|(&name, &cell)| {
+                Self::try_resolve(&mut rules, name, cell, (&insts, &cells, &mut names))
+            });
     }
 }

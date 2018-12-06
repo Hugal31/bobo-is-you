@@ -20,6 +20,11 @@ impl SystemBundle<'_, '_> for BoboIsYouBundle {
             "rules_update",
             &["move_action"],
         );
+        dispatcher.add(
+            SyncNameAndSpriteSystem::default(),
+            "sync_name_sprite",
+            &["rules_update"],
+        );
         dispatcher.add(WinSystem::default(), "win_system", &["move_action"]);
         dispatcher.add(PrefabLoaderSystem::<LevelPrefabData>::default(), "", &[]);
 

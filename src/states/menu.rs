@@ -9,9 +9,7 @@ pub struct MenuState {
 
 impl MenuState {
     pub fn new() -> MenuState {
-        MenuState {
-            level_number: 1,
-        }
+        MenuState { level_number: 1 }
     }
 
     /// Returns the path of the level, if it exists.
@@ -22,7 +20,6 @@ impl MenuState {
 }
 
 impl<'a, 'b> State<GameData<'a, 'b>, BoboStateEvent> for MenuState {
-
     fn on_resume(&mut self, _data: StateData<GameData>) {
         self.level_number += 1
     }

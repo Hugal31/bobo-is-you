@@ -43,6 +43,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, BoboStateEvent> for LevelLoaderState {
                 info!("Level {} loaded!", self.level_name);
                 Trans::Switch(Box::new(LevelState::new(
                     self.level_entity.expect("on_start was not called"),
+                    self.level_name.as_ref(),
                 )))
             }
             Completion::Failed => Trans::Quit,

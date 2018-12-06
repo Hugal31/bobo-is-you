@@ -6,6 +6,7 @@ use amethyst::prelude::*;
 use amethyst::renderer::{Camera, Projection};
 use amethyst::winit::VirtualKeyCode;
 
+use super::LevelLoaderState;
 use crate::components::*;
 use crate::events::*;
 
@@ -14,11 +15,18 @@ pub const CAMERA_HEIGHT: f32 = PIXEL_PER_CASE * LEVEL_HEIGHT as f32;
 
 pub struct LevelState {
     level_entity: Entity,
+    level_name: String,
 }
 
 impl LevelState {
-    pub fn new(level_entity: Entity) -> LevelState {
-        LevelState { level_entity }
+    pub fn new<S>(level_entity: Entity, level_name: S) -> LevelState
+    where
+        S: Into<String>,
+    {
+        LevelState {
+            level_entity,
+            level_name: level_name.into(),
+        }
     }
 }
 
@@ -46,7 +54,9 @@ impl<'a, 'b> State<GameData<'a, 'b>, BoboStateEvent> for LevelState {
             {
                 Trans::Quit
             }
-            BoboStateEvent::Window(e) if is_key_down(e, VirtualKeyCode::R) => Trans::Pop,
+            BoboStateEvent::Window(e) if is_key_down(e, VirtualKeyCode::R) => Trans::Switch(
+                Box::new(LevelLoaderState::for_level(self.level_name.as_ref())),
+            ),
             BoboStateEvent::Game(GameEvent::Win) => Trans::Pop,
             _ => Trans::None,
         }

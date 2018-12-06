@@ -21,10 +21,8 @@ use amethyst::renderer::{
 
 use self::events::BoboStateEventReader;
 
-const DISPLAY_CONFIG_PATH: &str =
-    concat!(env!("CARGO_MANIFEST_DIR"), "/resources/display_config.ron");
-const INPUT_CONFIG_PATH: &str =
-    concat!(env!("CARGO_MANIFEST_DIR"), "/resources/bindings_config.ron");
+const DISPLAY_CONFIG_PATH: &str = "resources/display_config.ron";
+const INPUT_CONFIG_PATH: &str = "resources/bindings_config.ron";
 
 pub fn start_game() -> Result<(), amethyst::Error> {
     let display_config = DisplayConfig::load(&DISPLAY_CONFIG_PATH);

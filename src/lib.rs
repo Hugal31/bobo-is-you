@@ -6,6 +6,7 @@ extern crate log;
 mod assets;
 mod bundle;
 mod components;
+mod events;
 mod inputs;
 mod prefabs;
 mod states;
@@ -17,6 +18,8 @@ use amethyst::prelude::*;
 use amethyst::renderer::{
     ColorMask, DisplayConfig, DrawSprite, Pipeline, RenderBundle, Stage, ALPHA,
 };
+
+use self::events::BoboStateEventReader;
 
 const DISPLAY_CONFIG_PATH: &str =
     concat!(env!("CARGO_MANIFEST_DIR"), "/resources/display_config.ron");
@@ -44,8 +47,11 @@ pub fn start_game() -> Result<(), amethyst::Error> {
                 .with_sprite_visibility_sorting(&["transform_system"]),
         )?;
 
-    let mut game =
-        Application::build("./resources", states::StartState::new())?.build(game_data)?;
+    let mut game = CoreApplication::<_, _, BoboStateEventReader>::build(
+        "./resources",
+        states::StartState::new(),
+    )?
+    .build(game_data)?;
     game.run();
     Ok(())
 }

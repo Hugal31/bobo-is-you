@@ -20,6 +20,7 @@ impl SystemBundle<'_, '_> for BoboIsYouBundle {
             "rules_update",
             &["move_action"],
         );
+        dispatcher.add(WinSystem::default(), "win_system", &["move_action"]);
         dispatcher.add(PrefabLoaderSystem::<LevelPrefabData>::default(), "", &[]);
 
         Ok(())

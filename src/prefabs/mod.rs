@@ -69,7 +69,7 @@ impl<'a> PrefabData<'a> for LevelPrefabEntityType {
                     .z = 1.0;
                 (Named::Bobo, ENTITY_SPRITE_BOBO)
             }
-            LevelPrefabEntityType::Flag => unimplemented!(),
+            LevelPrefabEntityType::Flag => (Named::Flag, ENTITY_SPRITE_FLAG),
             LevelPrefabEntityType::Instruction(i) => {
                 data.5.insert(entity, *i)?;
                 data.1
@@ -80,19 +80,17 @@ impl<'a> PrefabData<'a> for LevelPrefabEntityType {
                 (
                     Named::Instruction,
                     match i {
-                        Instruction::Name(n) => {
-                            match n {
-                                Named::Bobo => ENTITY_SPRITE_INST_BOBO,
-                                //Named::Flag => ENTITY_SPRITE_INST_FLAG,
-                                Named::Wall => ENTITY_SPRITE_INST_WALL,
-                                _ => unimplemented!(),
-                            }
-                        }
+                        Instruction::Name(n) => match n {
+                            Named::Bobo => ENTITY_SPRITE_INST_BOBO,
+                            Named::Flag => ENTITY_SPRITE_INST_FLAG,
+                            Named::Wall => ENTITY_SPRITE_INST_WALL,
+                            _ => unimplemented!(),
+                        },
                         Instruction::Is => ENTITY_SPRITE_INST_IS,
                         Instruction::Cap(c) if c.is_push => ENTITY_SPRITE_INST_PUSH,
                         Instruction::Cap(c) if c.is_stop => ENTITY_SPRITE_INST_STOP,
                         Instruction::Cap(c) if c.is_you => ENTITY_SPRITE_INST_YOU,
-                        Instruction::Cap(c) if c.is_win => unimplemented!(), //ENTITY_SPRITE_INST_WIN,
+                        Instruction::Cap(c) if c.is_win => ENTITY_SPRITE_INST_WIN, //ENTITY_SPRITE_INST_WIN,
                         Instruction::Cap(_) => panic!("Invalid cap"),
                     },
                 )

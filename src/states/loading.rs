@@ -8,6 +8,7 @@ use amethyst::renderer::{
 
 use super::MenuState;
 use crate::assets::GameAssets;
+use crate::events::BoboStateEvent;
 
 #[derive(Default)]
 pub struct LoaderState {
@@ -70,7 +71,7 @@ impl LoaderState {
     }
 }
 
-impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LoaderState {
+impl<'a, 'b> State<GameData<'a, 'b>, BoboStateEvent> for LoaderState {
     fn on_start(&mut self, data: StateData<GameData>) {
         let StateData { world, .. } = data;
 
@@ -80,12 +81,12 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LoaderState {
         });
     }
 
-    fn update(&mut self, data: StateData<GameData>) -> Trans<GameData<'a, 'b>, StateEvent> {
+    fn update(&mut self, data: StateData<GameData>) -> Trans<GameData<'a, 'b>, BoboStateEvent> {
         data.data.update(data.world);
 
         if self.progress.is_complete() {
             debug!("Loading complete!");
-            Trans::Push(Box::new(MenuState::new()))
+            Trans::Switch(Box::new(MenuState::new()))
         } else {
             Trans::None
         }

@@ -62,8 +62,36 @@ Prefab (
     (
       parent: 0,
       data: (
-        position: (x: 7, y: 6),
+        position: (x: 7, y: 5),
 	typ: Instruction(Cap((is_push: true))),
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 8, y: 7),
+	typ: Instruction(Cap((is_win: true))),
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 6, y: 7),
+	typ: Instruction(Name(Flag)),
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 1, y: 8),
+	typ: Flag,
+      ),
+    ),
+    (
+      parent: 0,
+      data: (
+        position: (x: 7, y: 7),
+	typ: Instruction(Is),
       ),
     ),
   ]

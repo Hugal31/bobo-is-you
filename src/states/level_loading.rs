@@ -2,6 +2,7 @@ use amethyst::assets::{Completion, PrefabLoader, ProgressCounter, RonFormat};
 use amethyst::ecs::Entity;
 use amethyst::prelude::*;
 
+use crate::events::BoboStateEvent;
 use crate::prefabs::LevelPrefabData;
 
 use super::LevelState;
@@ -23,7 +24,7 @@ impl LevelLoaderState {
     }
 }
 
-impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelLoaderState {
+impl<'a, 'b> State<GameData<'a, 'b>, BoboStateEvent> for LevelLoaderState {
     fn on_start(&mut self, data: StateData<GameData>) {
         let StateData { world, .. } = data;
 
@@ -34,7 +35,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelLoaderState {
         self.level_entity = Some(world.create_entity().with(prefab_handler).build());
     }
 
-    fn update(&mut self, data: StateData<GameData>) -> Trans<GameData<'a, 'b>, StateEvent> {
+    fn update(&mut self, data: StateData<GameData>) -> Trans<GameData<'a, 'b>, BoboStateEvent> {
         data.data.update(data.world);
 
         match self.progress.complete() {
@@ -43,7 +44,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelLoaderState {
                 Trans::Switch(Box::new(LevelState::new(
                     self.level_entity.expect("on_start was not called"),
                 )))
-            },
+            }
             Completion::Failed => Trans::Quit,
             Completion::Loading => Trans::None,
         }

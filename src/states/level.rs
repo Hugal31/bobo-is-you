@@ -7,6 +7,7 @@ use amethyst::renderer::{Camera, Projection};
 use amethyst::winit::VirtualKeyCode;
 
 use crate::components::*;
+use crate::events::*;
 
 pub const CAMERA_WIDTH: f32 = PIXEL_PER_CASE * LEVEL_WIDTH as f32;
 pub const CAMERA_HEIGHT: f32 = PIXEL_PER_CASE * LEVEL_HEIGHT as f32;
@@ -21,7 +22,7 @@ impl LevelState {
     }
 }
 
-impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
+impl<'a, 'b> State<GameData<'a, 'b>, BoboStateEvent> for LevelState {
     fn on_start(&mut self, data: StateData<GameData>) {
         let StateData { world, .. } = data;
 
@@ -37,20 +38,21 @@ impl<'a, 'b> State<GameData<'a, 'b>, StateEvent> for LevelState {
     fn handle_event(
         &mut self,
         _data: StateData<GameData>,
-        event: StateEvent,
-    ) -> Trans<GameData<'a, 'b>, StateEvent> {
+        event: BoboStateEvent,
+    ) -> Trans<GameData<'a, 'b>, BoboStateEvent> {
         match &event {
-            StateEvent::Window(e)
+            BoboStateEvent::Window(e)
                 if is_close_requested(e) || is_key_down(&e, VirtualKeyCode::Escape) =>
             {
                 Trans::Quit
             }
-            StateEvent::Window(e) if is_key_down(e, VirtualKeyCode::R) => Trans::Pop,
+            BoboStateEvent::Window(e) if is_key_down(e, VirtualKeyCode::R) => Trans::Pop,
+            BoboStateEvent::Game(GameEvent::Win) => Trans::Pop,
             _ => Trans::None,
         }
     }
 
-    fn update(&mut self, data: StateData<GameData>) -> Trans<GameData<'a, 'b>, StateEvent> {
+    fn update(&mut self, data: StateData<GameData>) -> Trans<GameData<'a, 'b>, BoboStateEvent> {
         data.data.update(data.world);
         Trans::None
     }

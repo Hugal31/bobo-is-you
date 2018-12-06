@@ -29,7 +29,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, BoboStateEvent> for LevelLoaderState {
         let StateData { world, .. } = data;
 
         let prefab_handler = world.exec(|loader: PrefabLoader<LevelPrefabData>| {
-            loader.load(self.level_name.clone(), RonFormat, (), ())
+            loader.load(self.level_name.clone(), RonFormat, (), &mut self.progress)
         });
 
         self.level_entity = Some(world.create_entity().with(prefab_handler).build());

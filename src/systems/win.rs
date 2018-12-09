@@ -1,5 +1,5 @@
 use amethyst::ecs::prelude::{
-    Join, ModifiedFlag, Read, ReadStorage, ReaderId, Resources, System, Write, WriteStorage,
+    ComponentEvent, Join, Read, ReadStorage, ReaderId, Resources, System, Write, WriteStorage,
 };
 use amethyst::shrev::EventChannel;
 
@@ -8,7 +8,7 @@ use crate::events::GameEvent;
 
 #[derive(Default)]
 pub struct WinSystem {
-    modified_id: Option<ReaderId<ModifiedFlag>>,
+    cells_event_id: Option<ReaderId<ComponentEvent>>,
 }
 
 impl<'a> System<'a> for WinSystem {
@@ -24,16 +24,20 @@ impl<'a> System<'a> for WinSystem {
         Self::SystemData::setup(res);
 
         let mut cells = WriteStorage::<CellCoordinate>::fetch(res);
-        self.modified_id = Some(cells.modified_mut().register_reader());
+        self.cells_event_id = Some(cells.register_reader());
     }
 
     fn run(&mut self, (rules, cells, names, mut game_events): Self::SystemData) {
         // FIXME: Is there a better way than this?
         let modified = cells
-            .modified()
-            .read(self.modified_id.as_mut().expect("setup was not called"))
-            .len()
-            != 0;
+            .channel()
+            .read(self.cells_event_id.as_mut().expect("setup was not called"))
+            .filter(|event| match event {
+                ComponentEvent::Modified(_id) => true,
+                _ => false,
+            })
+            .next()
+            .is_some();
 
         if !modified {
             return;

@@ -1,7 +1,6 @@
 use amethyst::core::Transform;
 use amethyst::ecs::prelude::{
-    BitSet, InsertedFlag, Join, ModifiedFlag, ReadStorage, ReaderId, Resources, System,
-    WriteStorage,
+    BitSet, ComponentEvent, Join, ReadStorage, ReaderId, Resources, System, WriteStorage,
 };
 
 use crate::components::{CellCoordinate, LEVEL_HEIGHT, PIXEL_PER_CASE};
@@ -9,8 +8,7 @@ use crate::components::{CellCoordinate, LEVEL_HEIGHT, PIXEL_PER_CASE};
 /// Sync Cell coordinates with Transform;
 #[derive(Default)]
 pub struct CellCoordinateSystem {
-    inserted_id: Option<ReaderId<InsertedFlag>>,
-    modified_id: Option<ReaderId<ModifiedFlag>>,
+    cells_events_id: Option<ReaderId<ComponentEvent>>,
 
     modified: BitSet,
 }
@@ -23,25 +21,25 @@ impl<'s> System<'s> for CellCoordinateSystem {
         Self::SystemData::setup(res);
 
         let mut cells = WriteStorage::<CellCoordinate>::fetch(res);
-        self.inserted_id = Some(cells.track_inserted());
-        self.modified_id = Some(cells.track_modified());
+        self.cells_events_id = Some(cells.register_reader());
     }
 
     fn run(&mut self, (cells, mut transforms): Self::SystemData) {
         self.modified.clear();
 
-        cells.populate_modified(
-            self.modified_id.as_mut().expect("setup was not called"),
-            &mut self.modified,
-        );
-        cells.populate_inserted(
-            self.inserted_id.as_mut().expect("setup was not called"),
-            &mut self.modified,
-        );
+        cells
+            .channel()
+            .read(self.cells_events_id.as_mut().expect("setup was not called"))
+            .for_each(|event| match event {
+                ComponentEvent::Inserted(id) | ComponentEvent::Modified(id) => {
+                    self.modified.add(*id);
+                }
+                ComponentEvent::Removed(_id) => (),
+            });
 
         for (cell, transform, _) in (&cells, &mut transforms, &self.modified).join() {
-            transform.translation.x = (cell.x as f32 + 0.5) * PIXEL_PER_CASE;
-            transform.translation.y = ((LEVEL_HEIGHT - cell.y) as f32 - 0.5) * PIXEL_PER_CASE;
+            transform.set_x((cell.x as f32 + 0.5) * PIXEL_PER_CASE);
+            transform.set_y(((LEVEL_HEIGHT - cell.y) as f32 - 0.5) * PIXEL_PER_CASE);
         }
     }
 }

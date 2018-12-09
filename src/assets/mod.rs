@@ -22,8 +22,6 @@ impl GameAssets {
         SpriteRender {
             sprite_sheet: self.entities_spritesheet.clone(),
             sprite_number,
-            flip_horizontal: false,
-            flip_vertical: false,
         }
     }
 }

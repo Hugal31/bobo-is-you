@@ -2,8 +2,8 @@ use amethyst::assets::{AssetStorage, Loader, ProgressCounter};
 use amethyst::ecs::Resources;
 use amethyst::prelude::*;
 use amethyst::renderer::{
-    MaterialTextureSet, PngFormat, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle, Texture,
-    TextureHandle, TextureMetadata,
+    PngFormat, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle, Texture, TextureHandle,
+    TextureMetadata,
 };
 
 use super::MenuState;
@@ -14,8 +14,6 @@ use crate::events::BoboStateEvent;
 pub struct LoaderState {
     /// Progress tracker.
     progress: ProgressCounter,
-    /// Texture id counter
-    texture_ids: u64,
 }
 
 impl LoaderState {
@@ -29,13 +27,7 @@ impl LoaderState {
         resources: &Resources,
     ) -> SpriteSheetHandle {
         let texture = self.load_texture(&format!("{}.png", name), resources);
-
-        let texture_id = self.texture_ids;
-        self.texture_ids += 1;
-        let mut material_texture_set = resources.fetch_mut::<MaterialTextureSet>();
-        material_texture_set.insert(texture_id, texture);
-
-        self.load_sprite_sheet(&format!("{}.ron", name), texture_id, resources)
+        self.load_sprite_sheet(&format!("{}.ron", name), texture, resources)
     }
 
     fn load_texture(&mut self, path: &str, resources: &Resources) -> TextureHandle {
@@ -53,7 +45,7 @@ impl LoaderState {
     fn load_sprite_sheet(
         &mut self,
         path: &str,
-        texture_id: u64,
+        texture: TextureHandle,
         resources: &Resources,
     ) -> SpriteSheetHandle {
         /*let texture_id = self.texture_ids;
@@ -64,7 +56,7 @@ impl LoaderState {
         loader.load(
             path,
             SpriteSheetFormat,
-            texture_id,
+            texture,
             &mut self.progress,
             &spritesheet_storage,
         )

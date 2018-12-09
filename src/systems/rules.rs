@@ -1,15 +1,12 @@
 use amethyst::ecs::prelude::{
-    InsertedFlag, Join, ModifiedFlag, ReadStorage, ReaderId, RemovedFlag, Resources, System, Write,
-    WriteStorage,
+    ComponentEvent, Join, ReadStorage, ReaderId, Resources, System, Write, WriteStorage,
 };
 
 use crate::components::*;
 
 #[derive(Default)]
 pub struct RulesUpdateSystem {
-    inserted_id: Option<ReaderId<InsertedFlag>>,
-    modified_id: Option<ReaderId<ModifiedFlag>>,
-    removed_id: Option<ReaderId<RemovedFlag>>,
+    cells_events_id: Option<ReaderId<ComponentEvent>>,
 }
 
 impl RulesUpdateSystem {
@@ -88,30 +85,17 @@ impl<'s> System<'s> for RulesUpdateSystem {
         Self::SystemData::setup(res);
 
         let mut cells = WriteStorage::<CellCoordinate>::fetch(res);
-        self.inserted_id = Some(cells.inserted_mut().register_reader());
-        self.modified_id = Some(cells.modified_mut().register_reader());
-        self.removed_id = Some(cells.removed_mut().register_reader());
+        self.cells_events_id = Some(cells.register_reader());
     }
 
     fn run(&mut self, (mut rules, insts, cells, mut names): Self::SystemData) {
-        // FIXME: Is there a better way than this?
         let modified = cells
-            .modified()
-            .read(self.modified_id.as_mut().expect("setup was not called"))
-            .len()
-            != 0;
-        let inserted = cells
-            .inserted()
-            .read(self.inserted_id.as_mut().expect("setup was not called"))
-            .len()
-            != 0;
-        let removed = cells
-            .removed()
-            .read(self.removed_id.as_mut().expect("setup was not called"))
-            .len()
-            != 0;
+            .channel()
+            .read(self.cells_events_id.as_mut().expect("setup was not called"))
+            .next()
+            .is_some();
 
-        if !modified && !inserted && !removed {
+        if !modified {
             return;
         }
 

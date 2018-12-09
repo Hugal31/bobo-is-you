@@ -1,5 +1,4 @@
-use amethyst::core::cgmath::{Matrix4, Vector3};
-use amethyst::core::{GlobalTransform, Parent};
+use amethyst::core::{Parent, Transform};
 use amethyst::ecs::Entity;
 use amethyst::input::{is_close_requested, is_key_down};
 use amethyst::prelude::*;
@@ -69,17 +68,18 @@ impl<'a, 'b> State<GameData<'a, 'b>, BoboStateEvent> for LevelState {
 }
 
 fn initialise_camera(parent: Entity, world: &mut World) -> Entity {
+    let mut transform = Transform::default();
+    transform.set_z(2.0);
+
     world
         .create_entity()
         .with(Camera::from(Projection::orthographic(
             0.0,
             CAMERA_WIDTH,
-            CAMERA_HEIGHT,
             0.0,
+            CAMERA_HEIGHT,
         )))
-        .with(GlobalTransform(Matrix4::from_translation(Vector3::new(
-            0.0, 0.0, 2.0,
-        ))))
+        .with(transform)
         .with(Parent { entity: parent })
         .build()
 }

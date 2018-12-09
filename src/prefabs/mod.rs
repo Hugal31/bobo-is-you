@@ -1,5 +1,5 @@
 use amethyst::assets::{PrefabData, PrefabError};
-use amethyst::core::{GlobalTransform, Transform};
+use amethyst::core::Transform;
 use amethyst::ecs::prelude::{Entity, ReadExpect, WriteStorage};
 use amethyst::renderer::{SpriteRender, Transparent};
 use serde::{Deserialize, Serialize};
@@ -9,7 +9,6 @@ use crate::components::{CellCoordinate, Instruction, Named};
 
 // TODO Use better type. Must avoid using twice the same resource in PrefabDatas
 type LevelSystemData<'a> = (
-    WriteStorage<'a, GlobalTransform>,
     WriteStorage<'a, Transform>,
     WriteStorage<'a, CellCoordinate>,
     ReadExpect<'a, GameAssets>,
@@ -62,20 +61,20 @@ impl<'a> PrefabData<'a> for LevelPrefabEntityType {
     ) -> Result<(), PrefabError> {
         let (name, sprite_number) = match self {
             LevelPrefabEntityType::Bobo => {
-                data.1
+                data.0
                     .get_mut(entity)
                     .expect("Transform should have been added")
-                    .translation
+                    .translation_mut()
                     .z = 1.0;
                 (Named::Bobo, ENTITY_SPRITE_BOBO)
             }
             LevelPrefabEntityType::Flag => (Named::Flag, ENTITY_SPRITE_FLAG),
             LevelPrefabEntityType::Instruction(i) => {
-                data.5.insert(entity, *i)?;
-                data.1
+                data.4.insert(entity, *i)?;
+                data.0
                     .get_mut(entity)
                     .expect("Transform should have been added")
-                    .translation
+                    .translation_mut()
                     .z = 1.0;
                 (
                     Named::Instruction,
@@ -98,9 +97,9 @@ impl<'a> PrefabData<'a> for LevelPrefabEntityType {
             LevelPrefabEntityType::Wall => (Named::Wall, ENTITY_SPRITE_WALL),
         };
 
-        data.4.insert(entity, name)?;
-        data.6.insert(entity, data.3.entity_sprite(sprite_number))?;
-        data.7.insert(entity, Transparent)?;
+        data.3.insert(entity, name)?;
+        data.5.insert(entity, data.2.entity_sprite(sprite_number))?;
+        data.6.insert(entity, Transparent)?;
 
         Ok(())
     }
@@ -116,9 +115,8 @@ impl<'a> PrefabData<'a> for CellCoordinate {
         data: &mut Self::SystemData,
         _entities: &[Entity],
     ) -> Result<Self::Result, PrefabError> {
-        data.0.insert(entity, GlobalTransform::default())?;
-        data.1.insert(entity, Transform::default())?;
-        data.2.insert(entity, self.clone())?;
+        data.0.insert(entity, Transform::default())?;
+        data.1.insert(entity, self.clone())?;
 
         Ok(())
     }

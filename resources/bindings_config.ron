@@ -1,9 +1,9 @@
 (
   axes: {},
   actions: {
-    Up: [[Key(Up)]],
-    Right: [[Key(Right)]],
-    Down: [[Key(Down)]],
-    Left: [[Key(Left)]],
+    Move(North): [[Key(Up)]],
+    Move(East): [[Key(Right)]],
+    Move(South): [[Key(Down)]],
+    Move(West): [[Key(Left)]],
   },
 )

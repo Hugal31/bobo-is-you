@@ -3,6 +3,7 @@ use amethyst::ecs::prelude::{
 };
 
 use crate::components::*;
+use crate::direction::Direction;
 
 #[derive(Default)]
 pub struct RulesUpdateSystem {
@@ -20,19 +21,13 @@ impl RulesUpdateSystem {
             &mut WriteStorage<Named>,
         ),
     ) {
-        // Try down
-        if let Some(down) = cell.try_down(LEVEL_HEIGHT) {
-            if let Some(downdown) = down.try_down(LEVEL_HEIGHT) {
-                Self::try_resolve_for_cells(rules, name, down, downdown, (insts, cells, names))
+        [Direction::South, Direction::East].iter().for_each(|&dir| {
+            if let Some(down) = cell.try_moved(dir, &LEVEL_BOUNDS) {
+                if let Some(downdown) = down.try_moved(dir, &LEVEL_BOUNDS) {
+                    Self::try_resolve_for_cells(rules, name, down, downdown, (insts, cells, names))
+                }
             }
-        }
-
-        // Try right
-        if let Some(right) = cell.try_right(LEVEL_WIDTH) {
-            if let Some(rightright) = right.try_right(LEVEL_WIDTH) {
-                Self::try_resolve_for_cells(rules, name, right, rightright, (insts, cells, names))
-            }
-        }
+        });
     }
 
     fn try_resolve_for_cells(
@@ -80,14 +75,6 @@ impl<'s> System<'s> for RulesUpdateSystem {
         WriteStorage<'s, Named>,
     );
 
-    fn setup(&mut self, res: &mut Resources) {
-        use amethyst::ecs::SystemData;
-        Self::SystemData::setup(res);
-
-        let mut cells = WriteStorage::<CellCoordinate>::fetch(res);
-        self.cells_events_id = Some(cells.register_reader());
-    }
-
     fn run(&mut self, (mut rules, insts, cells, mut names): Self::SystemData) {
         let modified = cells
             .channel()
@@ -110,5 +97,13 @@ impl<'s> System<'s> for RulesUpdateSystem {
             .for_each(|(&name, &cell)| {
                 Self::try_resolve(&mut rules, name, cell, (&insts, &cells, &mut names))
             });
+    }
+
+    fn setup(&mut self, res: &mut Resources) {
+        use amethyst::ecs::SystemData;
+        Self::SystemData::setup(res);
+
+        let mut cells = WriteStorage::<CellCoordinate>::fetch(res);
+        self.cells_events_id = Some(cells.register_reader());
     }
 }

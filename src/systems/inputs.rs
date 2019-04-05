@@ -15,10 +15,7 @@ pub struct MoveActionSystem {
 impl MoveActionSystem {
     fn next_cell(cell: CellCoordinate, action: InputAction) -> Option<CellCoordinate> {
         match action {
-            InputAction::Up => cell.try_up(0),
-            InputAction::Right => cell.try_right(LEVEL_WIDTH - 1),
-            InputAction::Down => cell.try_down(LEVEL_HEIGHT - 1),
-            InputAction::Left => cell.try_left(0),
+            InputAction::Move(dir) => cell.try_moved(dir, &LEVEL_BOUNDS),
         }
     }
 

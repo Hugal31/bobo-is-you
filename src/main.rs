@@ -14,8 +14,8 @@ fn main() -> Result<(), amethyst::Error> {
     logger::start_logger(Default::default());
 
     let matches = clap::App::new("Bobo Is You")
-        .version("0.1")
-        .author("Hugo Laloge")
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
         .subcommand(clap::SubCommand::with_name("editor").about("Launch the level editor"))
         .get_matches();
 

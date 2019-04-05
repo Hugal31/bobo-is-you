@@ -6,6 +6,7 @@ extern crate log;
 mod assets;
 mod bundle;
 mod components;
+mod direction;
 mod events;
 mod inputs;
 mod prefabs;

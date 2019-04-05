@@ -1,6 +1,9 @@
 use amethyst::ecs::prelude::{Component, FlaggedStorage, VecStorage};
 use serde::{Deserialize, Serialize};
 
+use crate::components::Bounds;
+use crate::direction::Direction;
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub struct CellCoordinate {
     pub x: u32,
@@ -13,47 +16,25 @@ impl CellCoordinate {
         CellCoordinate { x, y }
     }
 
-    pub fn try_up(self, min_y: u32) -> Option<CellCoordinate> {
-        if self.y > min_y {
-            Some(CellCoordinate {
+    pub fn try_moved(self, direction: Direction, bounds: &Bounds) -> Option<Self> {
+        match direction {
+            Direction::North if self.y > bounds.min_y => Some(CellCoordinate {
                 y: self.y - 1,
                 ..self
-            })
-        } else {
-            None
-        }
-    }
-
-    pub fn try_down(self, max_y: u32) -> Option<CellCoordinate> {
-        if self.y < max_y {
-            Some(CellCoordinate {
+            }),
+            Direction::South if self.y < bounds.max_y => Some(CellCoordinate {
                 y: self.y + 1,
                 ..self
-            })
-        } else {
-            None
-        }
-    }
-
-    pub fn try_right(self, max_x: u32) -> Option<CellCoordinate> {
-        if self.x < max_x {
-            Some(CellCoordinate {
+            }),
+            Direction::East if self.x < bounds.max_x => Some(CellCoordinate {
                 x: self.x + 1,
                 ..self
-            })
-        } else {
-            None
-        }
-    }
-
-    pub fn try_left(self, min_x: u32) -> Option<CellCoordinate> {
-        if self.x > min_x {
-            Some(CellCoordinate {
+            }),
+            Direction::West if self.x > bounds.min_x => Some(CellCoordinate {
                 x: self.x - 1,
                 ..self
-            })
-        } else {
-            None
+            }),
+            _ => None,
         }
     }
 }
@@ -67,21 +48,18 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_try_dirs() {
-        let zero = CellCoordinate::new(1, 1);
-        assert_eq!(None, zero.try_up(1));
-        assert_eq!(None, zero.try_left(1));
-        assert_eq!(Some(CellCoordinate::new(1, 0)), zero.try_up(0));
-        assert_eq!(Some(CellCoordinate::new(0, 1)), zero.try_left(0));
-        assert_eq!(Some(CellCoordinate::new(1, 2)), zero.try_down(9));
-        assert_eq!(Some(CellCoordinate::new(2, 1)), zero.try_right(4));
+    fn test_try_moved() {
+        let bounds = Bounds {
+            min_x: 1,
+            min_y: 1,
+            max_x: 5,
+            max_y: 7,
+        };
 
-        let max = CellCoordinate::new(5, 10);
-        assert_eq!(Some(CellCoordinate::new(5, 9)), max.try_up(0));
-        assert_eq!(Some(CellCoordinate::new(4, 10)), max.try_left(0));
-        assert_eq!(Some(CellCoordinate::new(5, 11)), max.try_down(11));
-        assert_eq!(Some(CellCoordinate::new(6, 10)), max.try_right(6));
-        assert_eq!(None, max.try_down(10));
-        assert_eq!(None, max.try_right(5));
+        let one = CellCoordinate::new(1, 1);
+        assert_eq!(None, one.try_moved(Direction::North, &bounds));
+        assert_eq!(None, one.try_moved(Direction::West, &bounds));
+        assert_eq!(Some(CellCoordinate::new(2, 1)), one.try_moved(Direction::East, &bounds));
+        assert_eq!(Some(CellCoordinate::new(1, 2)), one.try_moved(Direction::South, &bounds));
     }
 }

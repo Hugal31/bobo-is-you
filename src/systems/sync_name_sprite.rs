@@ -31,6 +31,8 @@ impl<'a> System<'a> for SyncNameAndSpriteSystem {
     }
 
     fn run(&mut self, (assets, names, mut sprites): Self::SystemData) {
+        self.modified.clear();
+
         names
             .channel()
             .read(self.named_events_id.as_mut().expect("setup was not called"))
@@ -43,6 +45,7 @@ impl<'a> System<'a> for SyncNameAndSpriteSystem {
             });
 
         for (name, sprite, _) in (&names, &mut sprites, &self.modified).join() {
+
             let sprite_number = match name {
                 Named::Bobo => ENTITY_SPRITE_BOBO,
                 Named::Instruction => continue,

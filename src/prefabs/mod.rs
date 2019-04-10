@@ -13,6 +13,7 @@ use self::cached::CachedAssetPrefab;
 
 pub use self::entities::EntityPrefabData;
 
+// TODO Refactor and unify named and types.
 #[derive(Deserialize, Serialize)]
 #[serde(untagged, bound(deserialize=""))]
 pub enum DirectOrLink<T>
@@ -76,8 +77,8 @@ where
 
 #[derive(Deserialize, Serialize, PrefabData)]
 pub struct LevelPrefabData {
-    position: CellCoordinate,
-    entity: DirectOrLink<EntityPrefabData>,
+    pub position: CellCoordinate,
+    pub entity: DirectOrLink<EntityPrefabData>,
 }
 
 impl<'a> PrefabData<'a> for CellCoordinate {

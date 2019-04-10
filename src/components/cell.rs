@@ -59,7 +59,13 @@ mod tests {
         let one = CellCoordinate::new(1, 1);
         assert_eq!(None, one.try_moved(Direction::North, &bounds));
         assert_eq!(None, one.try_moved(Direction::West, &bounds));
-        assert_eq!(Some(CellCoordinate::new(2, 1)), one.try_moved(Direction::East, &bounds));
-        assert_eq!(Some(CellCoordinate::new(1, 2)), one.try_moved(Direction::South, &bounds));
+        assert_eq!(
+            Some(CellCoordinate::new(2, 1)),
+            one.try_moved(Direction::East, &bounds)
+        );
+        assert_eq!(
+            Some(CellCoordinate::new(1, 2)),
+            one.try_moved(Direction::South, &bounds)
+        );
     }
 }

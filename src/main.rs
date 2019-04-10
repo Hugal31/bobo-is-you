@@ -19,9 +19,8 @@ fn main() -> Result<(), amethyst::Error> {
         .subcommand(clap::SubCommand::with_name("editor").about("Launch the level editor"))
         .get_matches();
 
-    if matches.subcommand_matches("edit").is_some() {
-        println!("No game editor for now");
-        Ok(())
+    if matches.subcommand_matches("editor").is_some() {
+        bobo_is_you::editor::start_level_editor()
     } else {
         bobo_is_you::start_game()
     }

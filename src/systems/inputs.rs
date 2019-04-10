@@ -76,15 +76,6 @@ impl<'s> System<'s> for MoveActionSystem {
         WriteStorage<'s, CellCoordinate>,
     );
 
-    fn setup(&mut self, res: &mut Resources) {
-        <Self::SystemData as DynamicSystemData>::setup(&self.accessor(), res);
-
-        self.action_reader = Some(
-            res.fetch_mut::<EventChannel<InputEvent<InputAction>>>()
-                .register_reader(),
-        );
-    }
-
     fn run(&mut self, (entities, rules, actions, names, mut cells): Self::SystemData) {
         for action in actions.read(self.action_reader.as_mut().expect("setup was not called")) {
             if let InputEvent::ActionPressed(a) = action {
@@ -109,5 +100,14 @@ impl<'s> System<'s> for MoveActionSystem {
                 }
             }
         }
+    }
+
+    fn setup(&mut self, res: &mut Resources) {
+        <Self::SystemData as DynamicSystemData>::setup(&self.accessor(), res);
+
+        self.action_reader = Some(
+            res.fetch_mut::<EventChannel<InputEvent<InputAction>>>()
+                .register_reader(),
+        );
     }
 }

@@ -5,6 +5,6 @@ mod menu;
 
 use self::level::*;
 use self::level_loading::*;
-use self::menu::*;
 
-pub use self::loading::LoaderState as StartState;
+pub use self::loading::LoaderState;
+pub use self::menu::MenuState;

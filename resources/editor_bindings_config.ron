@@ -1,0 +1,11 @@
+(
+  axes: {},
+  actions: {
+    Move(North): [[Key(Up)]],
+    Move(East): [[Key(Right)]],
+    Move(South): [[Key(Down)]],
+    Move(West): [[Key(Left)]],
+    Save: [[Key(LControl), Key(S)]],
+    Replace: [[Key(Space)]],
+  },
+)

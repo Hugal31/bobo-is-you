@@ -1,16 +1,9 @@
-extern crate amethyst;
-extern crate serde;
-#[macro_use]
-extern crate log;
+//! Editor specific stuff
 
-mod assets;
-mod bundle;
+mod bundles;
 mod components;
-mod direction;
-pub mod editor;
 mod events;
 mod inputs;
-mod prefabs;
 mod states;
 mod systems;
 
@@ -22,12 +15,12 @@ use amethyst::renderer::{
 };
 use amethyst::utils::application_root_dir;
 
-use self::events::BoboStateEventReader;
+use events::EditorStateEventReader;
 
 const DISPLAY_CONFIG_PATH: &str = "resources/display_config.ron";
-const INPUT_CONFIG_PATH: &str = "resources/bindings_config.ron";
+const INPUT_CONFIG_PATH: &str = "resources/editor_bindings_config.ron";
 
-pub fn start_game() -> Result<(), amethyst::Error> {
+pub fn start_level_editor() -> Result<(), amethyst::Error> {
     let display_config = DisplayConfig::load(&DISPLAY_CONFIG_PATH);
     let pipe = Pipeline::build().with_stage(
         Stage::with_backbuffer()
@@ -35,24 +28,25 @@ pub fn start_game() -> Result<(), amethyst::Error> {
             .with_pass(DrawFlat2D::new().with_transparency(ColorMask::all(), ALPHA, None)),
     );
 
-    let input_bundle =
-        InputBundle::<(), inputs::InputAction>::new().with_bindings_from_file(INPUT_CONFIG_PATH)?;
+    let input_bundle = InputBundle::<(), inputs::EditorInputAction>::new()
+        .with_bindings_from_file(INPUT_CONFIG_PATH)?;
 
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
-        .with_bundle(bundle::BoboIsYouBundle)?
+        .with_bundle(bundles::EditorBundle)?
         .with_bundle(
             RenderBundle::new(pipe, Some(display_config))
                 .with_sprite_sheet_processor()
                 .with_sprite_visibility_sorting(&["transform_system"]),
         )?;
 
-    let mut game = CoreApplication::<_, _, BoboStateEventReader>::build(
+    let mut game = CoreApplication::<_, _, EditorStateEventReader>::build(
         application_root_dir() + "/resources",
-        states::LoaderState::new(
-            assets::LoadableAsset::new("textures/entities-spritesheet"),
-            Box::new(states::MenuState::new()),
+        crate::states::LoaderState::new(
+            crate::assets::LoadableAsset::new("textures/entities-spritesheet")
+                .with_editor_assets("textures/editor-spritesheet"),
+            Box::new(self::states::LevelEditorState::new()),
         ),
     )?
     .build(game_data)?;

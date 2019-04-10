@@ -9,14 +9,14 @@ use crate::components::{Named, Instruction};
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EntityPrefabData {
     #[serde(default)]
-    instruction: Option<Instruction>,
+    pub instruction: Option<Instruction>,
     #[serde(default)]
-    name: Option<Named>,
+    pub name: Option<Named>,
     // TODO Use another prefab?
     #[serde(default)]
-    sprite: Option<usize>,
+    pub sprite: Option<usize>,
     #[serde(default)]
-    transparent: bool,
+    pub transparent: bool,
 }
 
 impl<'a> PrefabData<'a> for EntityPrefabData {

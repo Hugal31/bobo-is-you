@@ -1,84 +1,42 @@
-use amethyst::assets::{AssetStorage, Loader, ProgressCounter};
-use amethyst::ecs::Resources;
+use amethyst::assets::ProgressCounter;
 use amethyst::prelude::*;
-use amethyst::renderer::{
-    PngFormat, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle, Texture, TextureHandle,
-    TextureMetadata,
-};
 
-use super::MenuState;
-use crate::assets::GameAssets;
-use crate::events::BoboStateEvent;
+use crate::assets::LoadableAsset;
 
-#[derive(Default)]
-pub struct LoaderState {
+pub struct LoaderState<'a, 'b, E: Send + Sync + 'static> {
+    next_state: Option<Box<dyn State<GameData<'a, 'b>, E>>>,
+    to_load: LoadableAsset,
     /// Progress tracker.
     progress: ProgressCounter,
 }
 
-impl LoaderState {
-    pub fn new() -> LoaderState {
-        LoaderState::default()
-    }
-
-    fn load_textured_spritesheet(
-        &mut self,
-        name: &str,
-        resources: &Resources,
-    ) -> SpriteSheetHandle {
-        let texture = self.load_texture(&format!("{}.png", name), resources);
-        self.load_sprite_sheet(&format!("{}.ron", name), texture, resources)
-    }
-
-    fn load_texture(&mut self, path: &str, resources: &Resources) -> TextureHandle {
-        let loader = resources.fetch::<Loader>();
-        let texture_storage = resources.fetch::<AssetStorage<Texture>>();
-        loader.load(
-            path,
-            PngFormat,
-            TextureMetadata::srgb_scale(),
-            &mut self.progress,
-            &texture_storage,
-        )
-    }
-
-    fn load_sprite_sheet(
-        &mut self,
-        path: &str,
-        texture: TextureHandle,
-        resources: &Resources,
-    ) -> SpriteSheetHandle {
-        /*let texture_id = self.texture_ids;
-        let mut material_texture_set = resources.fetch_mut::<MaterialTextureSet>();
-        material_texture_set.insert(texture_id, texture);*/
-        let loader = resources.fetch::<Loader>();
-        let spritesheet_storage = resources.fetch::<AssetStorage<SpriteSheet>>();
-        loader.load(
-            path,
-            SpriteSheetFormat,
-            texture,
-            &mut self.progress,
-            &spritesheet_storage,
-        )
+impl<'a, 'b, E: Send + Sync + 'static> LoaderState<'a, 'b, E> {
+    pub fn new(to_load: LoadableAsset, next_state: Box<dyn State<GameData<'a, 'b>, E>>) -> Self {
+        LoaderState {
+            next_state: Some(next_state),
+            to_load,
+            progress: ProgressCounter::default(),
+        }
     }
 }
 
-impl<'a, 'b> State<GameData<'a, 'b>, BoboStateEvent> for LoaderState {
-    fn on_start(&mut self, data: StateData<GameData>) {
+impl<'a, 'b, E: Send + Sync + 'static> State<GameData<'a, 'b>, E> for LoaderState<'a, 'b, E> {
+    fn on_start(&mut self, data: StateData<GameData<'a, 'b>>) {
         let StateData { world, .. } = data;
 
-        world.add_resource(GameAssets {
-            entities_spritesheet: self
-                .load_textured_spritesheet("textures/entities-spritesheet", &world.res),
-        });
+        self.to_load.load(world, &mut self.progress);
     }
 
-    fn update(&mut self, data: StateData<GameData>) -> Trans<GameData<'a, 'b>, BoboStateEvent> {
+    fn update(&mut self, data: StateData<GameData<'a, 'b>>) -> Trans<GameData<'a, 'b>, E> {
         data.data.update(data.world);
 
         if self.progress.is_complete() {
             debug!("Loading complete!");
-            Trans::Switch(Box::new(MenuState::new()))
+            Trans::Switch(
+                self.next_state
+                    .take()
+                    .expect("Should not call update() after Trans::Switch"),
+            )
         } else {
             Trans::None
         }

@@ -1,0 +1,13 @@
+#![enable(implicit_some)]
+Prefab (
+  entities: [
+    (
+      data: (
+        instruction: Name(Wall),
+        name: Instruction,
+	    sprite: 4,
+	    transparent: true,
+      ),
+    ),
+  ]
+)

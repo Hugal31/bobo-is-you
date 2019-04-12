@@ -2,7 +2,7 @@ use amethyst::assets::PrefabLoaderSystem;
 use amethyst::core::bundle::*;
 use amethyst::ecs::DispatcherBuilder;
 
-use crate::prefabs::LevelPrefabData;
+use crate::prefabs::{EntityPrefabData, LevelPrefabData};
 use crate::systems::*;
 
 pub struct BoboIsYouBundle;
@@ -27,6 +27,7 @@ impl SystemBundle<'_, '_> for BoboIsYouBundle {
         );
         dispatcher.add(WinSystem::default(), "win_system", &["move_action"]);
         dispatcher.add(PrefabLoaderSystem::<LevelPrefabData>::default(), "", &[]);
+        dispatcher.add(PrefabLoaderSystem::<EntityPrefabData>::default(), "", &[]);
 
         Ok(())
     }

@@ -8,6 +8,7 @@ pub enum  Direction {
     West,
 }
 
+#[allow(dead_code)]
 pub static ALL_DIRECTIONS: [Direction; 4] = [
     Direction::North,
     Direction::East,

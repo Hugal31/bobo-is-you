@@ -1,112 +1,90 @@
-use amethyst::assets::{PrefabData, PrefabError};
+mod cached;
+mod entities;
+
+use amethyst::assets::{Prefab, PrefabData, PrefabError, ProgressCounter, RonFormat};
 use amethyst::core::Transform;
-use amethyst::ecs::prelude::{Entity, ReadExpect, WriteStorage};
-use amethyst::renderer::{SpriteRender, Transparent};
+use amethyst::derive::PrefabData;
+use amethyst::ecs::prelude::{Entity, WriteStorage};
 use serde::{Deserialize, Serialize};
 
-use crate::assets::*;
-use crate::components::{CellCoordinate, Instruction, Named};
+use crate::components::CellCoordinate;
 
-// TODO Use better type. Must avoid using twice the same resource in PrefabDatas
-type LevelSystemData<'a> = (
-    WriteStorage<'a, Transform>,
-    WriteStorage<'a, CellCoordinate>,
-    ReadExpect<'a, GameAssets>,
-    WriteStorage<'a, Named>,
-    WriteStorage<'a, Instruction>,
-    WriteStorage<'a, SpriteRender>,
-    WriteStorage<'a, Transparent>,
-);
+use self::cached::CachedAssetPrefab;
+
+pub use self::entities::EntityPrefabData;
 
 #[derive(Deserialize, Serialize)]
-pub struct LevelPrefabData {
-    position: CellCoordinate,
-    typ: LevelPrefabEntityType,
+#[serde(untagged, bound(deserialize=""))]
+pub enum DirectOrLink<T>
+where
+    T: for<'d> Deserialize<'d> + Send + Sync + 'static,
+{
+    #[serde(skip)]
+    CachedRon(CachedAssetPrefab<Prefab<T>, RonFormat>),
+    Direct(T),
+    Link(String),
 }
 
-impl<'a> PrefabData<'a> for LevelPrefabData {
-    type SystemData = LevelSystemData<'a>;
+impl<'a, T> PrefabData<'a> for DirectOrLink<T>
+where
+    T: for<'d> Deserialize<'d> + Send + Sync + 'static,
+    T: PrefabData<'a>,
+{
+    type SystemData = (
+        <CachedAssetPrefab<Prefab<T>, RonFormat> as PrefabData<'a>>::SystemData,
+        <T as PrefabData<'a>>::SystemData,
+    );
     type Result = ();
 
     fn add_to_entity(
         &self,
         entity: Entity,
         data: &mut Self::SystemData,
-        entities: &[Entity],
-    ) -> Result<Self::Result, PrefabError> {
-        self.position.add_to_entity(entity, data, entities)?;
-        self.typ.add_to_entity(entity, data, entities)?;
-
-        Ok(())
+        entities: &[Entity]) -> Result<Self::Result, PrefabError>
+    {
+        match self {
+            DirectOrLink::CachedRon(cached) => return cached.add_to_entity(entity, &mut data.0, entities)
+                .map(|_| ()),
+            DirectOrLink::Direct(t) => t.add_to_entity(entity, &mut data.1, entities)
+                .map(|_| ()),
+            DirectOrLink::Link(_) => unreachable!(), // load_sub_assets is called first
+        }
     }
-}
 
-#[derive(Deserialize, Serialize)]
-pub enum LevelPrefabEntityType {
-    Bobo,
-    Flag,
-    Instruction(Instruction),
-    Wall,
-}
-
-impl<'a> PrefabData<'a> for LevelPrefabEntityType {
-    type SystemData = LevelSystemData<'a>;
-    type Result = ();
-
-    fn add_to_entity(
-        &self,
-        entity: Entity,
-        data: &mut Self::SystemData,
-        _entities: &[Entity],
-    ) -> Result<(), PrefabError> {
-        let (name, sprite_number) = match self {
-            LevelPrefabEntityType::Bobo => {
-                data.0
-                    .get_mut(entity)
-                    .expect("Transform should have been added")
-                    .translation_mut()
-                    .z = 1.0;
-                (Named::Bobo, ENTITY_SPRITE_BOBO)
-            }
-            LevelPrefabEntityType::Flag => (Named::Flag, ENTITY_SPRITE_FLAG),
-            LevelPrefabEntityType::Instruction(i) => {
-                data.4.insert(entity, *i)?;
-                data.0
-                    .get_mut(entity)
-                    .expect("Transform should have been added")
-                    .translation_mut()
-                    .z = 1.0;
-                (
-                    Named::Instruction,
-                    match i {
-                        Instruction::Name(n) => match n {
-                            Named::Bobo => ENTITY_SPRITE_INST_BOBO,
-                            Named::Flag => ENTITY_SPRITE_INST_FLAG,
-                            Named::Wall => ENTITY_SPRITE_INST_WALL,
-                            _ => unimplemented!(),
-                        },
-                        Instruction::Is => ENTITY_SPRITE_INST_IS,
-                        Instruction::Cap(c) if c.is_push => ENTITY_SPRITE_INST_PUSH,
-                        Instruction::Cap(c) if c.is_stop => ENTITY_SPRITE_INST_STOP,
-                        Instruction::Cap(c) if c.is_you => ENTITY_SPRITE_INST_YOU,
-                        Instruction::Cap(c) if c.is_win => ENTITY_SPRITE_INST_WIN, //ENTITY_SPRITE_INST_WIN,
-                        Instruction::Cap(_) => panic!("Invalid cap"),
-                    },
-                )
-            }
-            LevelPrefabEntityType::Wall => (Named::Wall, ENTITY_SPRITE_WALL),
+    fn load_sub_assets(&mut self,
+                       progress: &mut ProgressCounter,
+                       system_data: &mut Self::SystemData) -> Result<bool, PrefabError>
+    {
+        let new_self = match self {
+            DirectOrLink::CachedRon(cached) => return cached.load_sub_assets(progress, &mut system_data.0),
+            DirectOrLink::Direct(t) => {
+                return t.load_sub_assets(progress, &mut system_data.1);
+            },
+            DirectOrLink::Link(name) => {
+                // TODO Check ends with RON
+                let mut cached = CachedAssetPrefab::File(name.clone(), RonFormat, ());
+                cached.load_sub_assets(progress, &mut system_data.0)?;
+                DirectOrLink::CachedRon(cached)
+            },
         };
 
-        data.3.insert(entity, name)?;
-        data.5.insert(entity, data.2.entity_sprite(sprite_number))?;
-        data.6.insert(entity, Transparent)?;
+        *self = new_self;
 
-        Ok(())
+        Ok(true)
     }
+}
+
+#[derive(Deserialize, Serialize, PrefabData)]
+pub struct LevelPrefabData {
+    position: CellCoordinate,
+    entity: DirectOrLink<EntityPrefabData>,
 }
 
 impl<'a> PrefabData<'a> for CellCoordinate {
-    type SystemData = LevelSystemData<'a>;
+    type SystemData = (
+        WriteStorage<'a, CellCoordinate>,
+        WriteStorage<'a, Transform>,
+    );
     type Result = ();
 
     fn add_to_entity(
@@ -115,8 +93,8 @@ impl<'a> PrefabData<'a> for CellCoordinate {
         data: &mut Self::SystemData,
         _entities: &[Entity],
     ) -> Result<Self::Result, PrefabError> {
-        data.0.insert(entity, Transform::default())?;
-        data.1.insert(entity, self.clone())?;
+        data.0.insert(entity, self.clone())?;
+        data.1.insert(entity, Transform::default())?;
 
         Ok(())
     }

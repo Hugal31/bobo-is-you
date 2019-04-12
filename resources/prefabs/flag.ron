@@ -1,0 +1,12 @@
+#![enable(implicit_some)]
+Prefab (
+  entities: [
+    (
+      data: (
+        name: Flag,
+        sprite: 10,
+        transparent: true,
+      ),
+    ),
+  ]
+)

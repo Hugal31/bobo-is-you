@@ -1,0 +1,13 @@
+#![enable(implicit_some)]
+Prefab (
+  entities: [
+    (
+      data: (
+        instruction: Cap((is_stop: true)),
+        name: Instruction,
+        sprite: 6,
+        transparent: true,
+      ),
+    ),
+  ]
+)

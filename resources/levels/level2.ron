@@ -7,91 +7,91 @@ Prefab (
       parent: 0,
       data: (
         position: (x: 0, y: 0),
-	typ: Bobo,
+	entity: "prefabs/bobo.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 4, y: 5),
-        typ: Wall,
+        entity: "prefabs/wall.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 4, y: 6),
-        typ: Wall,
+        entity: "prefabs/wall.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 2, y: 3),
-	typ: Instruction(Name(Bobo)),
+	entity: "prefabs/instructions/bobo.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 3, y: 3),
-	typ: Instruction(Is),
+	entity: "prefabs/instructions/is.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 4, y: 3),
-	typ: Instruction(Cap((is_you: true))),
+	entity: "prefabs/instructions/you.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 3, y: 2),
-	typ: Instruction(Name(Flag)),
+	entity: "prefabs/instructions/flag.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 3, y: 4),
-	typ: Instruction(Cap((is_push: true))),
+	entity: "prefabs/instructions/push.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 8, y: 7),
-	typ: Instruction(Cap((is_win: true))),
+	entity: "prefabs/instructions/win.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 6, y: 7),
-	typ: Instruction(Name(Wall)),
+	entity: "prefabs/instructions/wall.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 1, y: 8),
-	typ: Flag,
+	entity: "prefabs/flag.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 7, y: 7),
-	typ: Instruction(Is),
+	entity: "prefabs/instructions/is.ron",
       ),
     ),
     (
       parent: 0,
       data: (
         position: (x: 6, y: 8),
-	typ: Instruction(Name(Flag)),
+	entity: "prefabs/instructions/flag.ron",
       ),
     ),
   ]
